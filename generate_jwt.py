@@ -1,7 +1,6 @@
 import os
 from jwt import JWT, jwk_from_pem
 import time
-import logging
 
 
 def get_private_key_from_pem(pem: str) -> str | None:
@@ -11,13 +10,12 @@ def get_private_key_from_pem(pem: str) -> str | None:
         pem (str): The path to the `.pem` file.
 
     Returns:
-        str: The private key.
+        str | None: The private key.
     """
     try:
         with open(pem, "r") as pem_file:
             return pem_file.read()
     except FileNotFoundError:
-        logging.error(f"Could not locate PEM file {pem}")
         return None
 
 
@@ -28,7 +26,7 @@ def get_private_key_from_env(env_key: str) -> str | None:
         env_key (str): The key for the variable with the private key.
 
     Returns:
-        str: The private key.
+        str | None: The private key.
     """
     return os.getenv(env_key)
 
@@ -45,7 +43,7 @@ def generate_jwt(key: str, client_id: str) -> str:
     Returns:
         str: The JWT.
     """
-    signing_key = jwk_from_pem(bytes(key))
+    signing_key = jwk_from_pem(bytes(key, encoding="utf-8"))
 
     now = int(time.time())
     payload = {

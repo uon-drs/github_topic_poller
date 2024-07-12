@@ -2,6 +2,7 @@ import logging
 import azure.functions as func
 import os
 from generate_jwt import generate_jwt, get_private_key_from_env, get_private_key_from_pem
+from authenticate import get_access_token
 
 app = func.FunctionApp()
 
@@ -24,3 +25,13 @@ def timer_trigger(myTimer: func.TimerRequest) -> None:
         exit()
 
     jwt = generate_jwt(private_key, client_id)
+
+    installation_id = os.getenv("INSTALLATION_ID")
+    if installation_id is None:
+        logging.error("INSTALLATION_ID must be set in the environment.")
+        exit()
+
+    access_token = get_access_token(installation_id, jwt)
+    if access_token is None:
+        logging.error("Unable to obtain access token.")
+        exit()
